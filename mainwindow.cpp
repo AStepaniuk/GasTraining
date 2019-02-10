@@ -6,8 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     auto view = new MainView();
-    view->setModel(&model);
     setCentralWidget(view);
+    view->setModel(&model);
 
     showMaximized();
 }
