@@ -30,12 +30,18 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     Data/model.cpp \
-    View/mainview.cpp
+    View/mainview.cpp \
+    Services/picketgenerator.cpp \
+    View/picketsview.cpp \
+    View/picketview.cpp
 
 HEADERS += \
         mainwindow.h \
     Data/model.h \
-    View/mainview.h
+    View/mainview.h \
+    Services/picketgenerator.h \
+    View/picketsview.h \
+    View/picketview.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
