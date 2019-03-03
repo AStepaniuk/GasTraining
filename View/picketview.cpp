@@ -15,7 +15,7 @@ void PicketView::setPicket(const Picket &picket)
     update();
 }
 
-void PicketView::paintEvent(QPaintEvent *event)
+void PicketView::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
@@ -23,14 +23,4 @@ void PicketView::paintEvent(QPaintEvent *event)
 
     painter.setBrush(QBrush { QColor { 255, 255, 255 } });
     painter.drawRect(0, 0, width()-1, height()-1);
-}
-
-void PicketView::resizeEvent(QResizeEvent *event)
-{
-    if (height() != event->oldSize().height() || width() != event->oldSize().width())
-    {
-        auto w = height() * 140 / 200;
-
-        resize(w, height());
-    }
 }

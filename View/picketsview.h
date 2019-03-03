@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QHBoxLayout>
 
+#include "Layouts/flowlayout.h"
 #include "Data/model.h"
 
 class PicketsView : public QWidget
@@ -19,7 +20,7 @@ signals:
 public slots:
 
 private:
-    QHBoxLayout *picketsLayout;
+    FlowLayout *picketsLayout;
 };
 
 #endif // PICKETSVIEW_H

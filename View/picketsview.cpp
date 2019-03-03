@@ -7,7 +7,7 @@
 
 PicketsView::PicketsView(QWidget *parent) : QWidget(parent)
 {
-    picketsLayout = new QHBoxLayout();
+    picketsLayout = new FlowLayout();
     picketsLayout->setMargin(0);
     picketsLayout->setSpacing(3);
     // picketsLayout->

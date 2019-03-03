@@ -33,7 +33,8 @@ SOURCES += \
     View/mainview.cpp \
     Services/picketgenerator.cpp \
     View/picketsview.cpp \
-    View/picketview.cpp
+    View/picketview.cpp \
+    View/Layouts/flowlayout.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,7 +42,8 @@ HEADERS += \
     View/mainview.h \
     Services/picketgenerator.h \
     View/picketsview.h \
-    View/picketview.h
+    View/picketview.h \
+    View/Layouts/flowlayout.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -12,7 +12,7 @@ Model::Model()
     };
 }
 
-size_t Model::addPicket(const Picket &picket)
+int Model::addPicket(const Picket &picket)
 {
     pickets.push_back(picket);
     return pickets.size() - 1;
