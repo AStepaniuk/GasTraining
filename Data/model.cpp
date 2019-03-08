@@ -8,7 +8,7 @@ Model::Model()
             PressureType::G2,
             {
                 {
-                    PipeMaterial::Pe,
+                    PipeMaterial::St,
                     110,
                     {
                         { 0, 0, -0.12, NodeType::End, nullptr },
@@ -30,7 +30,11 @@ Model::Model()
             for(auto& node : section.nodes)
             {
                 nodes.push_back(&node);
+
+                node.section = &section;
             }
+
+            section.pipeline = &pipeline;
         }
     }
 }
