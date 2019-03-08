@@ -52,7 +52,7 @@ void MainView::paintEvent(QPaintEvent * /*event*/)
     for(int i = 0; i < nodes.size(); ++i)
     {
         const auto& node = nodes[i];
-        if (node.type == NodeType::End)
+        if (node->type == NodeType::End)
         {
             if (i == 0)
             {
@@ -95,7 +95,7 @@ void MainView::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-std::vector<QPointF> MainView::toViewCoordinates(const std::vector<Node> &nodes, QPointF scale, QPointF offset) const
+std::vector<QPointF> MainView::toViewCoordinates(const std::vector<Node*> &nodes, QPointF scale, QPointF offset) const
 {
     std::vector<QPointF> points{};
     points.reserve(nodes.size());
@@ -108,11 +108,11 @@ std::vector<QPointF> MainView::toViewCoordinates(const std::vector<Node> &nodes,
     return points;
 }
 
-QPointF MainView::toViewCoopdinates(const Node& node, QPointF scale, QPointF offset) const
+QPointF MainView::toViewCoopdinates(const Node* node, QPointF scale, QPointF offset) const
 {
     return {
-        (node.x + node.y * 0.707 * 0.5) * scale.x() + offset.x(),
-        (node.y * 0.707 * 0.5 + node.z) * scale.y() + offset.y()
+        (node->x + node->y * 0.707 * 0.5) * scale.x() + offset.x(),
+        (node->y * 0.707 * 0.5 + node->z) * scale.y() + offset.y()
     };
 }
 

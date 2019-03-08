@@ -28,8 +28,8 @@ private:
     const Model* model;
     std::vector<QPointF> viewPoints;
 
-    std::vector<QPointF> toViewCoordinates(const std::vector<Node>& nodes, QPointF scale, QPointF offset) const;
-    QPointF toViewCoopdinates(const Node& node, QPointF scale, QPointF offset) const;
+    std::vector<QPointF> toViewCoordinates(const std::vector<Node*>& nodes, QPointF scale, QPointF offset) const;
+    QPointF toViewCoopdinates(const Node* node, QPointF scale, QPointF offset) const;
 
     void adjustCoordinates(std::vector<QPointF>* points) const;
 

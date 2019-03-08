@@ -7,10 +7,14 @@ PicketGenerator::PicketGenerator()
 
 void PicketGenerator::generatePickets(Model *model)
 {
-    auto& nodes = model->getNodes();
-
-    for(int i = 0; i < nodes.size(); ++i)
+    for(const auto& pipeline : model->getPipelines())
     {
-        model->addPicket(Picket { &nodes[i] });
+        for(const auto& section : pipeline.sections)
+        {
+            for(const auto& node : section.nodes)
+            {
+                model->addPicket(Picket { &node });
+            }
+        }
     }
 }

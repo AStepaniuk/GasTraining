@@ -2,14 +2,37 @@
 
 Model::Model()
 {
-    nodes =
+    pipelines =
     {
-        { 0, 0, -0.12, NodeType::End },
-        { 0, 50, -0.12, NodeType::Turn },
-        { 80, 50, -0.12, NodeType::Turn },
-        { 80, -30, -0.12, NodeType::Turn },
-        { 120, -30, -0.12, NodeType::End }
+        {
+            PressureType::G2,
+            {
+                {
+                    PipeMaterial::Pe,
+                    110,
+                    {
+                        { 0, 0, -0.12, NodeType::End, nullptr },
+                        { 0, 50, -0.12, NodeType::Turn, nullptr },
+                        { 80, 50, -0.12, NodeType::Turn, nullptr },
+                        { 80, -30, -0.12, NodeType::Turn, nullptr },
+                        { 120, -30, -0.12, NodeType::End, nullptr }
+                    },
+                    nullptr
+                }
+            }
+        }
     };
+
+    for(auto& pipeline :pipelines)
+    {
+        for(auto& section : pipeline.sections)
+        {
+            for(auto& node : section.nodes)
+            {
+                nodes.push_back(&node);
+            }
+        }
+    }
 }
 
 int Model::addPicket(const Picket &picket)
@@ -18,7 +41,12 @@ int Model::addPicket(const Picket &picket)
     return pickets.size() - 1;
 }
 
-const std::vector<Node>& Model::getNodes() const
+const std::vector<Pipeline>& Model::getPipelines() const
+{
+    return pipelines;
+}
+
+const std::vector<Node *> &Model::getNodes() const
 {
     return nodes;
 }
