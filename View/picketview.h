@@ -19,7 +19,6 @@ public slots:
 
 protected:
     void paintEvent(QPaintEvent* event) override;
-    void resizeEvent(QResizeEvent *) override;
 
 private:
     const Picket* picket;
