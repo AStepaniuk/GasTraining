@@ -7,7 +7,22 @@
 struct PipeSection;
 struct Pipeline;
 
-enum class NodeType { End, Turn };
+enum class NodeType {
+    End,
+    Turn,
+    CPS, /* Catode protection station */
+    Protection,
+    Material, /* Metall - Polyethene */
+    CP, /* Control pipe */
+    CCollector, /* Condence collector */
+    CConductor, /* Control conductor */
+    BValve, /* Ball valve */
+    DFC, /* Dielectric flange connection */
+    Valve, /* valve */
+    GM, /* gas manhole */
+    HL, /* hydraulic lock */
+    Earthing /* earth electrode */
+};
 
 struct Node
 {

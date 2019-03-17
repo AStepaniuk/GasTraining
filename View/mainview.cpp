@@ -22,6 +22,7 @@ void MainView::setModel(const Model *model)
 void MainView::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
     painter.setPen(QPen{ QColor { 255, 255, 255 } });
 
