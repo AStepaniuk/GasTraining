@@ -3,6 +3,8 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QResizeEvent>
+#include <QTransform>
+
 #include <map>
 #include <algorithm>
 #include <cmath>
@@ -155,6 +157,32 @@ QPainterPath BuildCoordsPath(int x, int y, const std::function<int(int)>& toWidg
     return path;
 }
 
+QPainterPath BuildTurnPath(int x, int y, const std::function<int(int)>& toWidget)
+{
+    const auto l = toWidget(35);
+    const auto w = toWidget(2);
+    const auto al = toWidget(35 - 8);
+    const auto aw = toWidget(6);
+
+    QPainterPath path;
+
+    path.moveTo(0, w);
+    path.lineTo(al, w);
+    path.lineTo(al, aw);
+    path.lineTo(l, 0);
+    path.lineTo(al, -aw);
+    path.lineTo(al, -w);
+    path.lineTo(0, -w);
+
+    path.closeSubpath();
+
+    QTransform t;
+    t.rotate(-45);
+    t.translate(-toWidget(x), -toWidget(y));
+
+    return t.map(path);
+}
+
 void PicketView::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
@@ -207,5 +235,10 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
 
         painter.setBrush(QBrush { QColor { 0, 0, 0 } });
         painter.drawPath(BuildCoordsPath(70, 110, toWidget));
+
+        //if (node->type == NodeType::Turn)
+        //{
+            painter.drawPath(BuildTurnPath(70, 110, toWidget));
+        //}
     }
 }
