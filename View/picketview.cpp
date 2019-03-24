@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <utility>
 
 PicketView::PicketView(QWidget *parent) : QWidget(parent)
 {
@@ -42,33 +43,49 @@ const QString& GetPressureSteelTitle(PressureType type)
     return nothing;
 }
 
-int GetNodeAngle(const Node& node)
+std::tuple<double, double> GetTurnAngles(const Node& node)
 {
+    if (node.type != NodeType::Turn)
+    {
+        return { 0.0, 0.0 };
+    }
+
     const auto& nodes = node.section->nodes;
     const auto iter = std::find_if(nodes.begin(), nodes.end(), [&node](const auto& n) { return &n == &node; });
 
     if (iter == nodes.end())
     {
-        return 0;
+        return { 0.0, 0.0 };
     }
 
     const size_t i { static_cast<size_t>(iter - nodes.begin()) };
     if (i == 0 || i == nodes.size() - 1)
     {
-        return 0;
+        return { 0.0, 0.0 };
     }
 
     const auto& prev = nodes[i-1];
     const auto& next = nodes[i+1];
 
-    const auto a1 = std::atan2(prev.x - node.x, prev.y - node.y);
-    const auto a2 = std::atan2(next.x - node.x, next.y - node.y);
+    const auto a1 = std::atan2(prev.y - node.y, prev.x - node.x) * 180.0 / M_PI;
+    const auto a2 = std::atan2(next.y - node.y, next.x - node.x) * 180.0 / M_PI;
 
-    auto a = (a2 - a1) * 180.0 / M_PI;
+    return { a1, a2 };
+}
+
+int GetNodeAngle(const Node& node)
+{
+    const auto angles = GetTurnAngles(node);
+    auto a = (std::get<1>(angles) - std::get<0>(angles));
 
     if (a > 180.0)
     {
         a = a - 360.0;
+    }
+
+    if (a < -180.0)
+    {
+        a = a + 360.0;
     }
 
     if (a < 0)
@@ -127,7 +144,7 @@ QPainterPath BuildCoordsPath(int x, int y, const std::function<int(int)>& toWidg
     const auto l = toWidget(50);
     const auto w = toWidget(2);
     const auto al = toWidget(50 - 8);
-    const auto aw = toWidget(6);
+    const auto aw = toWidget(5);
 
     QPainterPath path;
 
@@ -157,12 +174,12 @@ QPainterPath BuildCoordsPath(int x, int y, const std::function<int(int)>& toWidg
     return path;
 }
 
-QPainterPath BuildTurnPath(int x, int y, const std::function<int(int)>& toWidget)
+QPainterPath BuildTurnPath(int x, int y, int a, const std::function<int(int)>& toWidget)
 {
-    const auto l = toWidget(35);
+    const auto l = toWidget(40);
     const auto w = toWidget(2);
-    const auto al = toWidget(35 - 8);
-    const auto aw = toWidget(6);
+    const auto al = toWidget(40 - 8);
+    const auto aw = toWidget(5);
 
     QPainterPath path;
 
@@ -177,10 +194,58 @@ QPainterPath BuildTurnPath(int x, int y, const std::function<int(int)>& toWidget
     path.closeSubpath();
 
     QTransform t;
-    t.rotate(-45);
-    t.translate(-toWidget(x), -toWidget(y));
+    t.translate(toWidget(x), toWidget(y));
+    t.rotate(a);
 
     return t.map(path);
+}
+
+int GetSchemaAngle(double realAngle)
+{
+    if (realAngle > 180.0)
+    {
+        realAngle -= 360.0;
+    }
+
+    if (realAngle < 0.5 && realAngle > -0.5)
+    {
+        return 0;
+    }
+
+    if (realAngle < 90.5 && realAngle > 89.5)
+    {
+        return 90;
+    }
+
+    if (realAngle < -179.5 || realAngle > 179.5)
+    {
+        return 180;
+    }
+
+    if (realAngle < -89.5 && realAngle > -90.5)
+    {
+        return -90;
+    }
+
+    if (realAngle < 90 && realAngle > 0)
+    {
+        return 45;
+    }
+
+    if (realAngle > 90)
+    {
+        return 135;
+    }
+
+    if (realAngle > -90 && realAngle < 0)
+    {
+        return -45;
+    }
+
+    if (realAngle > -90)
+    {
+        return -135;
+    }
 }
 
 void PicketView::paintEvent(QPaintEvent * /*event*/)
@@ -236,9 +301,23 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
         painter.setBrush(QBrush { QColor { 0, 0, 0 } });
         painter.drawPath(BuildCoordsPath(70, 110, toWidget));
 
-        //if (node->type == NodeType::Turn)
-        //{
-            painter.drawPath(BuildTurnPath(70, 110, toWidget));
-        //}
+        if (node->type == NodeType::Turn)
+        {
+            const auto angles = GetTurnAngles(*node);
+
+            const auto a1 = std::get<0>(angles);
+            const auto sa1 = GetSchemaAngle(a1);
+            if (sa1 != 0 && sa1 != 90 && sa1 != 180)
+            {
+                painter.drawPath(BuildTurnPath(70, 110, sa1, toWidget));
+            }
+
+            const auto a2 = std::get<1>(angles);
+            const auto sa2 = GetSchemaAngle(a2);
+            if (sa2 != 0 && sa2 != 90 && sa2 != 180)
+            {
+                painter.drawPath(BuildTurnPath(70, 110, sa2, toWidget));
+            }
+        }
     }
 }
