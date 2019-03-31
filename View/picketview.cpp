@@ -47,7 +47,7 @@ std::tuple<double, double> GetTurnAngles(const Node& node)
 {
     if (node.type != NodeType::Turn)
     {
-        return { 0.0, 0.0 };
+        return std::make_tuple(0.0, 0.0);
     }
 
     const auto& nodes = node.section->nodes;
@@ -55,13 +55,13 @@ std::tuple<double, double> GetTurnAngles(const Node& node)
 
     if (iter == nodes.end())
     {
-        return { 0.0, 0.0 };
+        return std::make_tuple(0.0, 0.0);
     }
 
     const size_t i { static_cast<size_t>(iter - nodes.begin()) };
     if (i == 0 || i == nodes.size() - 1)
     {
-        return { 0.0, 0.0 };
+        return std::make_tuple(0.0, 0.0);
     }
 
     const auto& prev = nodes[i-1];
@@ -70,7 +70,7 @@ std::tuple<double, double> GetTurnAngles(const Node& node)
     const auto a1 = std::atan2(prev.y - node.y, prev.x - node.x) * 180.0 / M_PI;
     const auto a2 = std::atan2(next.y - node.y, next.x - node.x) * 180.0 / M_PI;
 
-    return { a1, a2 };
+    return std::make_tuple(a1, a2);
 }
 
 int GetNodeAngle(const Node& node)
@@ -246,6 +246,8 @@ int GetSchemaAngle(double realAngle)
     {
         return -135;
     }
+
+    return 0;
 }
 
 void PicketView::paintEvent(QPaintEvent * /*event*/)
