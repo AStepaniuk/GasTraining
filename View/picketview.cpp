@@ -250,6 +250,70 @@ int GetSchemaAngle(double realAngle)
     return 0;
 }
 
+QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles, const std::function<int(int)>& toWidget)
+{
+    const auto l = toWidget(26);
+    const auto w = toWidget(1);
+    const auto al = toWidget(8);
+    const auto aw = toWidget(3);
+
+    QPainterPath path;
+
+    auto a1 = -std::get<0>(angles);
+    auto a2 = -std::get<1>(angles);
+    if (a2 < a1)
+    {
+        a2 = a2 + 360;
+    }
+    auto da = a2 - a1;
+
+    if (std::abs(da) > 180)
+    {
+        a1 = -std::get<1>(angles);
+        a2 = -std::get<0>(angles);
+        if (a2 < a1)
+        {
+            a2 = a2 + 360;
+        }
+        da = a2 - a1;
+    }
+
+    const auto d1 = l + w + l + w;
+    const auto d2 = d1 - w*4;
+
+    path.arcMoveTo(-l, -l, d1, d1, a1);
+    path.arcTo(-l, -l, d1, d1, a1, da);
+
+    const auto sa1 = std::sin(-a1 * M_PI / 180);
+    const auto ca1 = std::cos(-a1 * M_PI / 180);
+    const auto sa2 = std::sin(-a2 * M_PI / 180);
+    const auto ca2 = std::cos(-a2 * M_PI / 180);
+    path.lineTo((l-w*2) * ca2, (l-w*2) * sa2);
+    path.arcTo(-l+w, -l+w, d2, d2, a2, -da);
+
+    path.closeSubpath();
+
+    QPainterPath arrow;
+    arrow.lineTo(al, aw);
+    arrow.lineTo(al, -aw);
+    arrow.closeSubpath();
+
+    QTransform ta1;
+    ta1.translate((l-w) * ca1, (l-w) * sa1);
+    ta1.rotate(a1 + 90);
+    path.addPath(ta1.map(arrow));
+
+    QTransform ta2;
+    ta2.translate((l-w) * ca2, (l-w) * sa2);
+    ta2.rotate(a2 - 90);
+    path.addPath(ta2.map(arrow));
+
+    QTransform t;
+    t.translate(toWidget(x), toWidget(y));
+
+    return t.map(path);
+}
+
 void PicketView::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
@@ -320,6 +384,8 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
             {
                 painter.drawPath(BuildTurnPath(70, 110, sa2, toWidget));
             }
+
+            painter.drawPath(BuildTurnAnglePath(70, 110, std::make_tuple(sa1, sa2), toWidget));
         }
     }
 }
