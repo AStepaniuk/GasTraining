@@ -250,7 +250,7 @@ int GetSchemaAngle(double realAngle)
     return 0;
 }
 
-QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles, const std::function<int(int)>& toWidget)
+QPainterPath BuildAnyTurnAnglePath(int a1, int a2, int da, const std::function<int(int)>& toWidget)
 {
     const auto l = toWidget(26);
     const auto w = toWidget(1);
@@ -258,25 +258,6 @@ QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles
     const auto aw = toWidget(3);
 
     QPainterPath path;
-
-    auto a1 = -std::get<0>(angles);
-    auto a2 = -std::get<1>(angles);
-    if (a2 < a1)
-    {
-        a2 = a2 + 360;
-    }
-    auto da = a2 - a1;
-
-    if (std::abs(da) > 180)
-    {
-        a1 = -std::get<1>(angles);
-        a2 = -std::get<0>(angles);
-        if (a2 < a1)
-        {
-            a2 = a2 + 360;
-        }
-        da = a2 - a1;
-    }
 
     const auto d1 = l + w + l + w;
     const auto d2 = d1 - w*4;
@@ -300,18 +281,76 @@ QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles
 
     QTransform ta1;
     ta1.translate((l-w) * ca1, (l-w) * sa1);
-    ta1.rotate(a1 + 90);
+    ta1.rotate(-a1 - 90);
     path.addPath(ta1.map(arrow));
 
     QTransform ta2;
     ta2.translate((l-w) * ca2, (l-w) * sa2);
-    ta2.rotate(a2 - 90);
+    ta2.rotate(-a2 + 90);
     path.addPath(ta2.map(arrow));
+
+    return path;
+}
+
+QPainterPath BuildNormalTurnAnglePath(int a1, int a2, const std::function<int(int)>& toWidget)
+{
+    const auto d = toWidget(15);
+
+    QPainterPath path;
+
+    const auto dx = (a1 == 0 || a2 == 0) ? d : -d;
+    const auto dy = (a1 == 90 || a2 == 90) ? -d : d;
+    const auto dsx = dx*0.93;
+    const auto dsy = dy*0.93;
+
+    path.moveTo(dx, 0);
+    path.lineTo(dx, dy);
+    path.lineTo(0, dy);
+    path.lineTo(0, dsy);
+    path.lineTo(dsx, dsy);
+    path.lineTo(dsx, 0);
+
+    return path;
+}
+
+QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles, const std::function<int(int)>& toWidget)
+{
+    auto a1 = -std::get<0>(angles);
+    auto a2 = -std::get<1>(angles);
+    if (a2 < a1)
+    {
+        a2 = a2 + 360;
+    }
+    auto da = a2 - a1;
+
+    if (std::abs(da) > 180)
+    {
+        a1 = -std::get<1>(angles);
+        a2 = -std::get<0>(angles);
+        if (a2 < a1)
+        {
+            a2 = a2 + 360;
+        }
+        da = a2 - a1;
+    }
+
+    if (da == 0 || da == 180 || da == -180)
+    {
+        return {};
+    }
+
 
     QTransform t;
     t.translate(toWidget(x), toWidget(y));
 
-    return t.map(path);
+    if (da == 90 || da == -90)
+    {
+        return t.map(BuildNormalTurnAnglePath(a1, a2, toWidget));
+    }
+    else
+    {
+        return t.map(BuildAnyTurnAnglePath(a1, a2, da, toWidget));
+    }
 }
 
 void PicketView::paintEvent(QPaintEvent * /*event*/)
