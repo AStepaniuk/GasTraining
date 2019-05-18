@@ -13,7 +13,7 @@
 
 PicketView::PicketView(QWidget *parent) : QWidget(parent)
 {
-
+    status = Status::Passive;
 }
 
 void PicketView::setPicket(const Picket &picket)
@@ -376,22 +376,33 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
     }
     else
     {
-        if (pipeline->pressure == PressureType::G4)
+        if (status == Status::Active)
         {
-            painter.setPen(QPen{ QColor { 0xD0, 0x30, 0x2B } });
-            painter.setBrush(QBrush { QColor { 0xD0, 0x30, 0x2B } });
-            painter.drawRect(0, 0, width()-1, height()-1);
+            if (pipeline->pressure == PressureType::G4)
+            {
+                painter.setPen(QPen{ QColor { 0xD0, 0x30, 0x2B } });
+                painter.setBrush(QBrush { QColor { 0xD0, 0x30, 0x2B } });
+                painter.drawRect(0, 0, width()-1, height()-1);
 
-            painter.setPen(QPen{ QColor { 0, 126, 82 } });
-            painter.setBrush(QBrush { QColor { 0, 126, 82 } });
-            painter.drawRect(toWidget(5), toWidget(5), toWidget(130), toWidget(190));
+                painter.setPen(QPen{ QColor { 0, 126, 82 } });
+                painter.setBrush(QBrush { QColor { 0, 126, 82 } });
+                painter.drawRect(toWidget(5), toWidget(5), toWidget(130), toWidget(190));
 
-            painter.setPen(QPen{ QColor { 0, 0, 0 } });
+                painter.setPen(QPen{ QColor { 0, 0, 0 } });
+            }
+            else
+            {
+                painter.setBrush(QBrush { QColor { 0, 126, 82 } });
+                painter.drawRect(0, 0, width()-1, height()-1);
+            }
         }
         else
         {
-            painter.setBrush(QBrush { QColor { 0, 126, 82 } });
-            painter.drawRect(0, 0, width()-1, height()-1);
+            if (status == Status::Passive)
+            {
+                painter.setBrush(QBrush { QColor { 200, 200, 200 } });
+                painter.drawRect(0, 0, width()-1, height()-1);
+            }
         }
 
         painter.setFont(font30);
@@ -427,4 +438,22 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
             painter.drawPath(BuildTurnAnglePath(70, 110, std::make_tuple(sa1, sa2), toWidget));
         }
     }
+}
+
+void PicketView::makeActive()
+{
+    status = Status::Active;
+    update();
+}
+
+void PicketView::makeSuccess()
+{
+    status = Status::Succeed;
+    update();
+}
+
+void PicketView::makeFailed()
+{
+    status = Status::Failed;
+    update();
 }

@@ -27,6 +27,7 @@ CONFIG += c++1z
 #QMAKE_CXXFLAGS += -std=gnu++1z
 
 SOURCES += \
+    Services/quiz.cpp \
         main.cpp \
         mainwindow.cpp \
     Data/model.cpp \
@@ -37,6 +38,7 @@ SOURCES += \
     View/Layouts/flowlayout.cpp
 
 HEADERS += \
+    Services/quiz.h \
         mainwindow.h \
     Data/model.h \
     View/mainview.h \

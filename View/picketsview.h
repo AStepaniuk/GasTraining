@@ -4,8 +4,12 @@
 #include <QWidget>
 #include <QHBoxLayout>
 
+#include <vector>
+
 #include "Layouts/flowlayout.h"
 #include "Data/model.h"
+
+#include "picketview.h"
 
 class PicketsView : public QWidget
 {
@@ -14,6 +18,7 @@ public:
     explicit PicketsView(QWidget *parent = 0);
 
     void setPickets(const std::vector<Picket>& pickets);
+    void setActivePicket(size_t index);
 
 signals:
 
@@ -21,6 +26,8 @@ public slots:
 
 private:
     FlowLayout *picketsLayout;
+
+    std::vector<PicketView*> views;
 };
 
 #endif // PICKETSVIEW_H

@@ -5,6 +5,7 @@
 #include "View/mainview.h"
 #include "View/picketsview.h"
 #include "Services/picketgenerator.h"
+#include "Services/quiz.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -28,6 +29,9 @@ MainWindow::MainWindow(QWidget *parent)
     centralWidget->setLayout(layout);
 
     setCentralWidget(centralWidget);
+
+    auto quiz = new Quiz(&model, pickets);
+    quiz->Start();
 
     showMaximized();
 }

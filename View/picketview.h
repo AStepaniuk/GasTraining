@@ -9,9 +9,13 @@ class PicketView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PicketView(QWidget *parent = 0);
+    explicit PicketView(QWidget *parent = nullptr);
 
     void setPicket(const Picket& picket);
+
+    void makeActive();
+    void makeSuccess();
+    void makeFailed();
 
 signals:
 
@@ -22,6 +26,9 @@ protected:
 
 private:
     const Picket* picket;
+
+    enum class Status { Passive, Active, Succeed, Failed };
+    Status status;
 };
 
 #endif // PICKETVIEW_H

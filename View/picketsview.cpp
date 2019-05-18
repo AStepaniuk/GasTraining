@@ -33,5 +33,11 @@ void PicketsView::setPickets(const std::vector<Picket> &pickets)
         widget->setPicket(picket);
 
         picketsLayout->addWidget(widget);
+        views.push_back(widget);
     }
+}
+
+void PicketsView::setActivePicket(size_t index)
+{
+    views[index]->makeActive();
 }
