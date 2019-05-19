@@ -41,3 +41,13 @@ void PicketsView::setActivePicket(size_t index)
 {
     views[index]->makeActive();
 }
+
+void PicketsView::markSucceed(size_t index)
+{
+    views[index]->makeSuccess();
+}
+
+void PicketsView::markFailed(size_t index)
+{
+    views[index]->makeFailed();
+}

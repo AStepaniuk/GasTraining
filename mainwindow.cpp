@@ -33,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
     auto quiz = new Quiz(&model, pickets);
     quiz->Start();
 
+    QObject::connect(view, &MainView::nodeClicked, quiz, Quiz::checkGuess);
+
     showMaximized();
 }
 

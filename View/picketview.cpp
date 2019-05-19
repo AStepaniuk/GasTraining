@@ -398,11 +398,8 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
         }
         else
         {
-            if (status == Status::Passive)
-            {
-                painter.setBrush(QBrush { QColor { 200, 200, 200 } });
-                painter.drawRect(0, 0, width()-1, height()-1);
-            }
+            painter.setBrush(QBrush { QColor { 200, 200, 200 } });
+            painter.drawRect(0, 0, width()-1, height()-1);
         }
 
         painter.setFont(font30);
@@ -436,6 +433,19 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
             }
 
             painter.drawPath(BuildTurnAnglePath(70, 110, std::make_tuple(sa1, sa2), toWidget));
+        }
+
+        if (status == Status::Succeed)
+        {
+            painter.setPen(QPen{ QColor { 30, 150, 30 }, 10.0 });
+            painter.drawLine(toWidget(80), toWidget(30), toWidget(100), toWidget(50));
+            painter.drawLine(toWidget(100), toWidget(50), toWidget(120), toWidget(10));
+        }
+        else if (status == Status::Failed)
+        {
+            painter.setPen(QPen{ QColor { 150, 30, 30 }, 10.0 });
+            painter.drawLine(toWidget(80), toWidget(10), toWidget(120), toWidget(50));
+            painter.drawLine(toWidget(80), toWidget(50), toWidget(120), toWidget(10));
         }
     }
 }

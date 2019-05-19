@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include <vector>
+
 #include "Data/model.h"
 #include "View/picketsview.h"
 
@@ -17,12 +19,17 @@ public:
 signals:
 
 public slots:
+    void checkGuess(int guess);
 
 private:
     Model* model;
     PicketsView* view;
 
     int activePicket = -1;
+
+    std::vector<int> past;
+
+    int getNextActivePicket();
 };
 
 #endif // QUIZ_H

@@ -23,10 +23,12 @@ protected:
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent *) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     const Model* model;
     std::vector<QPointF> viewPoints;
+    int hoveredNode = -1;
 
     std::vector<QPointF> toViewCoordinates(const std::vector<Node*>& nodes, QPointF scale, QPointF offset) const;
     QPointF toViewCoopdinates(const Node* node, QPointF scale, QPointF offset) const;
@@ -36,6 +38,8 @@ private:
     QPointF angle(QPointF point, QPointF direction) const;
     void drawLine(QPainter* painter, QPointF base, QPointF angle, const std::initializer_list<QPointF>& points);
     void drawPipeEnd(QPainter* painter, QPointF point, QPointF direction);
+
+    int getNodeUnderPosition(QPoint position, int d);
 };
 
 #endif // MAINVIEW_H

@@ -6,10 +6,16 @@
 #include <limits>
 #include <cmath>
 
+namespace MainViewImpl
+{
+    constexpr auto MouseSensitivity = 15;
+}
+
+using namespace MainViewImpl;
 
 MainView::MainView(QWidget *parent) : QWidget(parent)
 {
-
+    setMouseTracking(true);
 }
 
 void MainView::setModel(const Model *model)
@@ -50,7 +56,7 @@ void MainView::paintEvent(QPaintEvent * /*event*/)
     painter.setPen(QPen{ QBrush { QColor { 0, 0, 0 } }, 2.0 });
 
     const auto& nodes = model->getNodes();
-    for(int i = 0; i < nodes.size(); ++i)
+    for(size_t i = 0; i < nodes.size(); ++i)
     {
         const auto& node = nodes[i];
         if (node->type == NodeType::End)
@@ -65,6 +71,16 @@ void MainView::paintEvent(QPaintEvent * /*event*/)
             }
         }
     }
+
+    if (hoveredNode >= 0)
+    {
+        painter.setPen(QPen{ QBrush { QColor { 100, 100, 220 } }, 1.0 });
+        painter.setBrush(Qt::NoBrush);
+
+        const auto& point = viewPoints[static_cast<size_t>(hoveredNode)];
+
+        painter.drawRect(point.x() - MouseSensitivity, point.y() - MouseSensitivity, MouseSensitivity*2, MouseSensitivity*2);
+    }
 }
 
 void MainView::resizeEvent(QResizeEvent *)
@@ -75,24 +91,24 @@ void MainView::resizeEvent(QResizeEvent *)
 
 void MainView::mouseReleaseEvent(QMouseEvent *event)
 {
-    constexpr auto d = 5;
-
     if (event->button() != Qt::MouseButton::LeftButton)
     {
         return;
     }
 
-    for(size_t i = 0; i < viewPoints.size(); ++i)
+    if (hoveredNode >= 0)
     {
-        const auto& point = viewPoints[i];
-        if (
-            point.x() - d > event->x() && point.x() + d < event->x() &&
-            point.y() - d > event->y() && point.y() + d < event->y()
-        )
-        {
-            emit nodeClicked(i);
-            break;
-        }
+        emit nodeClicked(static_cast<size_t>(hoveredNode));
+    }
+}
+
+void MainView::mouseMoveEvent(QMouseEvent *event)
+{
+    const auto nodeIndex = getNodeUnderPosition(QPoint(event->x(), event->y()), MouseSensitivity);
+    if (nodeIndex != hoveredNode)
+    {
+        hoveredNode = nodeIndex;
+        update();
     }
 }
 
@@ -195,4 +211,52 @@ void MainView::drawPipeEnd(QPainter* painter, QPointF point, QPointF direction)
         QPointF { 0.0, 10.0 },
         QPointF { 5.0, 10.0 }
     });
+}
+
+int MainView::getNodeUnderPosition(QPoint position, int d)
+{
+    std::vector<size_t> candidates;
+
+    for(size_t i = 0; i < viewPoints.size(); ++i)
+    {
+        const auto& point = viewPoints[i];
+        if (
+            point.x() - d < position.x() && point.x() + d > position.x() &&
+            point.y() - d < position.y() && point.y() + d > position.y()
+        )
+        {
+            candidates.push_back(i);
+        }
+    }
+
+    if (candidates.size() == 0)
+    {
+        return -1;
+    }
+    else if (candidates.size() == 1)
+    {
+        return static_cast<int>(candidates[0]);
+    }
+    else
+    {
+        auto bestCandidate = -1;
+        auto bestDistance = 0.0;
+
+        for(const auto i : candidates)
+        {
+            const auto& point = viewPoints[i];
+
+            const auto dx = position.x() - point.x();
+            const auto dy = position.y() - point.y();
+            auto distance = dx*dx + dy*dy;
+
+            if (bestCandidate < 0 || bestDistance > distance)
+            {
+                bestCandidate = static_cast<int>(i);
+                bestDistance = distance;
+            }
+        }
+
+        return bestCandidate;
+    }
 }

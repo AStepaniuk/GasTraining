@@ -19,6 +19,8 @@ public:
 
     void setPickets(const std::vector<Picket>& pickets);
     void setActivePicket(size_t index);
+    void markSucceed(size_t index);
+    void markFailed(size_t index);
 
 signals:
 
