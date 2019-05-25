@@ -376,7 +376,7 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
     }
     else
     {
-        if (status == Status::Active)
+        if (status != Status::Passive)
         {
             if (pipeline->pressure == PressureType::G4)
             {
@@ -435,17 +435,30 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
             painter.drawPath(BuildTurnAnglePath(70, 110, std::make_tuple(sa1, sa2), toWidget));
         }
 
-        if (status == Status::Succeed)
+        if (status == Status::Succeed || status == Status::Failed)
         {
-            painter.setPen(QPen{ QColor { 30, 150, 30 }, 10.0 });
-            painter.drawLine(toWidget(80), toWidget(30), toWidget(100), toWidget(50));
-            painter.drawLine(toWidget(100), toWidget(50), toWidget(120), toWidget(10));
+            painter.setPen(QPen{ QColor { 20, 20, 20 }, 2.0 });
+            painter.setBrush(QBrush{ QColor { 240, 240, 240 } });
+
+            painter.drawEllipse(toWidget(80), toWidget(10), toWidget(50), toWidget(50));
+
+            if (status == Status::Succeed)
+            {
+                painter.setPen(QPen{ QColor { 30, 150, 30 }, 8.0, Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap, Qt::PenJoinStyle::RoundJoin });
+
+                QPainterPath path;
+                path.moveTo(toWidget(90), toWidget(35));
+                path.lineTo(toWidget(100), toWidget(50));
+                path.lineTo(toWidget(115), toWidget(20));
+
+                painter.drawPath(path);
+            }
+            else if (status == Status::Failed)
+            {
+                painter.setPen(QPen{ QColor { 150, 30, 30 }, 8.0, Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap, Qt::PenJoinStyle::RoundJoin });
+                painter.drawLine(toWidget(93), toWidget(23), toWidget(117), toWidget(47));
+                painter.drawLine(toWidget(93), toWidget(47), toWidget(117), toWidget(23));
         }
-        else if (status == Status::Failed)
-        {
-            painter.setPen(QPen{ QColor { 150, 30, 30 }, 10.0 });
-            painter.drawLine(toWidget(80), toWidget(10), toWidget(120), toWidget(50));
-            painter.drawLine(toWidget(80), toWidget(50), toWidget(120), toWidget(10));
         }
     }
 }
