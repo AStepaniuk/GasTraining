@@ -5,6 +5,7 @@
 #include <QHBoxLayout>
 
 #include <vector>
+#include <map>
 
 #include "Layouts/flowlayout.h"
 #include "Data/model.h"
@@ -29,7 +30,8 @@ public slots:
 private:
     FlowLayout *picketsLayout;
 
-    std::vector<PicketView*> views;
+    std::vector<Picket> pickets;
+    std::map<size_t, PicketView*> views;
 };
 
 #endif // PICKETSVIEW_H

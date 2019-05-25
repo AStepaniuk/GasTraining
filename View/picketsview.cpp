@@ -27,19 +27,27 @@ void PicketsView::setPickets(const std::vector<Picket> &pickets)
 {
     qDeleteAll(picketsLayout->children());
 
-    for(const auto& picket : pickets)
-    {
-        auto widget = new PicketView();
-        widget->setPicket(picket);
-
-        picketsLayout->addWidget(widget);
-        views.push_back(widget);
-    }
+    this->pickets = pickets;
 }
 
 void PicketsView::setActivePicket(size_t index)
 {
-    views[index]->makeActive();
+    const auto viewIterator = views.find(index);
+    if (viewIterator == views.end())
+    {
+        const auto& picket = pickets[index];
+        auto widget = new PicketView();
+        widget->setPicket(picket);
+
+        picketsLayout->addWidget(widget);
+        views[index] = widget;
+
+        widget->makeActive();
+    }
+    else
+    {
+        viewIterator->second->makeActive();
+    }
 }
 
 void PicketsView::markSucceed(size_t index)
