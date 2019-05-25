@@ -7,9 +7,11 @@
 
 #include <map>
 #include <algorithm>
-#include <cmath>
 #include <functional>
 #include <utility>
+#include <cmath>
+
+#include "Services/turngeometry.h"
 
 PicketView::PicketView(QWidget *parent) : QWidget(parent)
 {
@@ -43,60 +45,7 @@ const QString& GetPressureSteelTitle(PressureType type)
     return nothing;
 }
 
-std::tuple<double, double> GetTurnAngles(const Node& node)
-{
-    if (node.type != NodeType::Turn)
-    {
-        return std::make_tuple(0.0, 0.0);
-    }
-
-    const auto& nodes = node.section->nodes;
-    const auto iter = std::find_if(nodes.begin(), nodes.end(), [&node](const auto& n) { return &n == &node; });
-
-    if (iter == nodes.end())
-    {
-        return std::make_tuple(0.0, 0.0);
-    }
-
-    const size_t i { static_cast<size_t>(iter - nodes.begin()) };
-    if (i == 0 || i == nodes.size() - 1)
-    {
-        return std::make_tuple(0.0, 0.0);
-    }
-
-    const auto& prev = nodes[i-1];
-    const auto& next = nodes[i+1];
-
-    const auto a1 = std::atan2(prev.y - node.y, prev.x - node.x) * 180.0 / M_PI;
-    const auto a2 = std::atan2(next.y - node.y, next.x - node.x) * 180.0 / M_PI;
-
-    return std::make_tuple(a1, a2);
-}
-
-int GetNodeAngle(const Node& node)
-{
-    const auto angles = GetTurnAngles(node);
-    auto a = (std::get<1>(angles) - std::get<0>(angles));
-
-    if (a > 180.0)
-    {
-        a = a - 360.0;
-    }
-
-    if (a < -180.0)
-    {
-        a = a + 360.0;
-    }
-
-    if (a < 0)
-    {
-        a = -a;
-    }
-
-    return static_cast<int>(a);
-}
-
-const QString GetPicketSignature(const Picket& picket)
+const QString GetPicketSignature(const Picket& picket, const TurnGeometry::Data* turnGeometry)
 {
     static std::map<NodeType, QString> types
     {
@@ -125,7 +74,7 @@ const QString GetPicketSignature(const Picket& picket)
         }
         else
         {
-            const auto angle = GetNodeAngle(*picket.node);
+            const auto angle = turnGeometry->picketTurnAngle;
 
             return angle > 0
                     ? res->second + QString::number(angle) + "\u00B0"
@@ -198,56 +147,6 @@ QPainterPath BuildTurnPath(int x, int y, int a, const std::function<int(int)>& t
     t.rotate(a);
 
     return t.map(path);
-}
-
-int GetSchemaAngle(double realAngle)
-{
-    if (realAngle > 180.0)
-    {
-        realAngle -= 360.0;
-    }
-
-    if (realAngle < 0.5 && realAngle > -0.5)
-    {
-        return 0;
-    }
-
-    if (realAngle < 90.5 && realAngle > 89.5)
-    {
-        return 90;
-    }
-
-    if (realAngle < -179.5 || realAngle > 179.5)
-    {
-        return 180;
-    }
-
-    if (realAngle < -89.5 && realAngle > -90.5)
-    {
-        return -90;
-    }
-
-    if (realAngle < 90 && realAngle > 0)
-    {
-        return 45;
-    }
-
-    if (realAngle > 90)
-    {
-        return 135;
-    }
-
-    if (realAngle > -90 && realAngle < 0)
-    {
-        return -45;
-    }
-
-    if (realAngle > -90)
-    {
-        return -135;
-    }
-
-    return 0;
 }
 
 QPainterPath BuildAnyTurnAnglePath(int a1, int a2, int da, const std::function<int(int)>& toWidget)
@@ -408,25 +307,23 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
         painter.drawText(line1Rect, Qt::AlignLeft | Qt::AlignBottom, GetPressureSteelTitle(pipeline->pressure), nullptr);
         painter.drawText(line1Rect, Qt::AlignRight | Qt::AlignBottom, QString::number(section->diameter), nullptr);
 
-        QRect line2Rect { toWidget(10), toWidget(50), toWidget(120), toWidget(30) };
-        painter.drawText(line2Rect, Qt::AlignHCenter | Qt::AlignBottom, GetPicketSignature(*picket), nullptr);
-
         painter.setBrush(QBrush { QColor { 0, 0, 0 } });
         painter.drawPath(BuildCoordsPath(70, 110, toWidget));
 
+        const TurnGeometry::Data *geometry = nullptr;
+
         if (node->type == NodeType::Turn)
         {
-            const auto angles = GetTurnAngles(*node);
+            const auto turnGeometry = TurnGeometry::Calculate(*node);
+            geometry = &turnGeometry;
 
-            const auto a1 = std::get<0>(angles);
-            const auto sa1 = GetSchemaAngle(a1);
+            const auto sa1 = turnGeometry.picketAngle1;
             if (sa1 != 0 && sa1 != 90 && sa1 != 180)
             {
                 painter.drawPath(BuildTurnPath(70, 110, sa1, toWidget));
             }
 
-            const auto a2 = std::get<1>(angles);
-            const auto sa2 = GetSchemaAngle(a2);
+            const auto sa2 = turnGeometry.picketAngle2;
             if (sa2 != 0 && sa2 != 90 && sa2 != 180)
             {
                 painter.drawPath(BuildTurnPath(70, 110, sa2, toWidget));
@@ -434,6 +331,10 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
 
             painter.drawPath(BuildTurnAnglePath(70, 110, std::make_tuple(sa1, sa2), toWidget));
         }
+
+        QRect line2Rect { toWidget(10), toWidget(50), toWidget(120), toWidget(30) };
+        painter.drawText(line2Rect, Qt::AlignHCenter | Qt::AlignBottom, GetPicketSignature(*picket, geometry), nullptr);
+
 
         if (status == Status::Succeed || status == Status::Failed)
         {
