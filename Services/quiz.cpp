@@ -1,9 +1,9 @@
 #include "quiz.h"
 
-#include <random>
 #include <algorithm>
 
 #include "turngeometry.h"
+#include "randomgenerator.h"
 
 namespace QuizImpl
 {
@@ -156,10 +156,7 @@ int Quiz::getNextActivePicket()
 {
     if (!unplayed.empty())
     {
-        std::mt19937 eng(static_cast<long unsigned int>(time(nullptr)));
-        std::uniform_int_distribution<> distr(0, unplayed.size()-1);
-
-        const auto next = distr(eng);
+        const auto next = RandomGenerator::Get(unplayed.size()-1);
 
         const auto res = unplayed[next];
         unplayed.erase(unplayed.begin() + next);

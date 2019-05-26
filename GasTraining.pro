@@ -37,7 +37,8 @@ SOURCES += \
     View/picketview.cpp \
     View/Layouts/flowlayout.cpp \
     Services/turngeometry.cpp \
-    Services/gamegenerator.cpp
+    Services/gamegenerator.cpp \
+    Services/randomgenerator.cpp
 
 HEADERS += \
     Services/quiz.h \
@@ -49,7 +50,8 @@ HEADERS += \
     View/picketview.h \
     View/Layouts/flowlayout.h \
     Services/turngeometry.h \
-    Services/gamegenerator.h
+    Services/gamegenerator.h \
+    Services/randomgenerator.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

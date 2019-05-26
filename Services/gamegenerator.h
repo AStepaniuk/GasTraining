@@ -7,6 +7,8 @@ class GameGenerator
 {
 public:
     static Model GenerateTestModel();
+
+    static Model GenerateModel();
 };
 
 #endif // GAMEGENERATOR_H
