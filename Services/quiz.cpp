@@ -112,12 +112,24 @@ Quiz::Quiz(Model* model, PicketsView* view, QObject *parent)
 
 void Quiz::Start()
 {
+    unplayed.clear();
+
+    for (int i = 0; i < model->getPickets().size(); ++i)
+    {
+        unplayed.push_back(i);
+    }
+
     activePicket = getNextActivePicket();
     view->setActivePicket(activePicket);
 }
 
 void Quiz::checkGuess(int guess)
 {
+    if (activePicket < 0)
+    {
+        return;
+    }
+
     const auto& actualPicket =  model->getPickets()[activePicket];
     const auto& guessedPicket =  model->getPickets()[guess];
 
@@ -130,28 +142,29 @@ void Quiz::checkGuess(int guess)
         view->markFailed(activePicket);
     }
 
-    past.push_back(activePicket);
-    if (past.size() < model->getPickets().size())
+    activePicket = getNextActivePicket();
+    if (activePicket >= 0)
     {
-        activePicket = getNextActivePicket();
         view->setActivePicket(activePicket);
     }
 }
 
 int Quiz::getNextActivePicket()
 {
-    const auto pickets = model->getPickets();
-    do
+    if (!unplayed.empty())
     {
         std::mt19937 eng(static_cast<long unsigned int>(time(nullptr)));
-        std::uniform_int_distribution<> distr(0, pickets.size()-1);
+        std::uniform_int_distribution<> distr(0, unplayed.size()-1);
 
         const auto next = distr(eng);
 
-        if (std::find(past.begin(), past.end(), next) == past.end())
-        {
-            return next;
-        }
+        const auto res = unplayed[next];
+        unplayed.erase(unplayed.begin() + next);
+
+        return res;
     }
-    while(true);
+    else
+    {
+        return -1;
+    }
 }

@@ -27,7 +27,7 @@ private:
 
     int activePicket = -1;
 
-    std::vector<int> past;
+    std::vector<int> unplayed;
 
     int getNextActivePicket();
 };
