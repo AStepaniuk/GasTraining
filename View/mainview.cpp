@@ -5,6 +5,7 @@
 //#include <optional>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 
 namespace MainViewImpl
 {
@@ -23,6 +24,22 @@ void MainView::setModel(const Model *model)
     this->model = model;
     viewPoints = toViewCoordinates(model->getNodes(), QPointF{1.0, 1.0}, QPointF{0.0, 0.0});
     adjustCoordinates(&viewPoints);
+}
+
+void MainView::markPicketSucceed(size_t picketIndex)
+{
+    const auto alreadySuccededIt = std::find(succeedPickets.begin(), succeedPickets.end(), picketIndex);
+    if (alreadySuccededIt == succeedPickets.end())
+    {
+        succeedPickets.push_back(picketIndex);
+
+        if (hoveredPicket == picketIndex)
+        {
+            hoveredPicket = -1;
+        }
+
+        update();
+    }
 }
 
 void MainView::paintEvent(QPaintEvent * /*event*/)
@@ -72,14 +89,27 @@ void MainView::paintEvent(QPaintEvent * /*event*/)
         }
     }
 
-    if (hoveredNode >= 0)
+    if (hoveredPicket >= 0)
     {
-        painter.setPen(QPen{ QBrush { QColor { 100, 100, 220 } }, 1.0 });
+        painter.setPen(QPen{ QBrush { QColor { 70, 70, 200 } }, 2.0 });
         painter.setBrush(Qt::NoBrush);
 
-        const auto& point = viewPoints[static_cast<size_t>(hoveredNode)];
+        const auto& point = getNodeViewPointByPicketIndex(static_cast<size_t>(hoveredPicket));
 
         painter.drawRect(point.x() - MouseSensitivity, point.y() - MouseSensitivity, MouseSensitivity*2, MouseSensitivity*2);
+    }
+
+    // succedded pickets
+    if (!succeedPickets.empty())
+    {
+        painter.setPen(QPen{ QBrush { QColor { 20, 180, 20 } }, 2.0 });
+        painter.setBrush(Qt::NoBrush);
+
+        for(const auto picketIndex : succeedPickets)
+        {
+            const auto& point = getNodeViewPointByPicketIndex(static_cast<size_t>(picketIndex));
+            painter.drawEllipse(point, MouseSensitivity, MouseSensitivity);
+        }
     }
 }
 
@@ -96,18 +126,35 @@ void MainView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    if (hoveredNode >= 0)
+    if (hoveredPicket >= 0)
     {
-        emit nodeClicked(static_cast<size_t>(hoveredNode));
+        emit picketClicked(static_cast<size_t>(hoveredPicket));
     }
 }
 
 void MainView::mouseMoveEvent(QMouseEvent *event)
 {
     const auto nodeIndex = getNodeUnderPosition(QPoint(event->x(), event->y()), MouseSensitivity);
-    if (nodeIndex != hoveredNode)
+
+    auto picketIndex = -1;
+    if (nodeIndex >= 0)
     {
-        hoveredNode = nodeIndex;
+        const auto node = model->getNodes()[nodeIndex];
+        picketIndex = findPicketForNode(node);
+    }
+
+    if (picketIndex != -1)
+    {
+        auto picketSuccededIt = std::find(succeedPickets.begin(), succeedPickets.end(), picketIndex);
+        if (picketSuccededIt != succeedPickets.end())
+        {
+            picketIndex = -1;
+        }
+    }
+
+    if (picketIndex != hoveredPicket)
+    {
+        hoveredPicket = picketIndex;
         update();
     }
 }
@@ -210,7 +257,18 @@ void MainView::drawPipeEnd(QPainter* painter, QPointF point, QPointF direction)
         QPointF { 0.0, -10.0 },
         QPointF { 0.0, 10.0 },
         QPointF { 5.0, 10.0 }
-    });
+             });
+}
+
+QPointF MainView::getNodeViewPointByPicketIndex(size_t picketIndex)
+{
+    const auto& picket = model->getPickets()[picketIndex];
+
+    const auto& nodes = model->getNodes();
+    const auto nodeIt = std::find(nodes.begin(), nodes.end(), picket.node);
+    const auto nodeIndex = nodeIt - nodes.begin();
+
+    return viewPoints[static_cast<size_t>(nodeIndex)];
 }
 
 int MainView::getNodeUnderPosition(QPoint position, int d)
@@ -259,4 +317,14 @@ int MainView::getNodeUnderPosition(QPoint position, int d)
 
         return bestCandidate;
     }
+}
+
+int MainView::findPicketForNode(const Node *node)
+{
+    const auto& pickets = model->getPickets();
+    const auto picketIt = std::find_if(pickets.begin(), pickets.end(), [node](const auto& p) { return p.node == node; });
+
+    return picketIt != pickets.end()
+        ? picketIt - pickets.begin()
+        : -1;
 }

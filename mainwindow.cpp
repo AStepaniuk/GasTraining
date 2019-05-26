@@ -31,11 +31,18 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(centralWidget);
 
     auto quiz = new Quiz(&model, pickets);
-    quiz->Start();
 
-    QObject::connect(view, &MainView::nodeClicked, quiz, &Quiz::checkGuess);
+    QObject::connect(view, &MainView::picketClicked, quiz, &Quiz::checkGuess);
+
+    QObject::connect(quiz, &Quiz::activePicketChanged, pickets, &PicketsView::setActivePicket);
+    QObject::connect(quiz, &Quiz::guessSucceeded, [pickets](auto active, auto /*guessed*/) { pickets->markSucceed(active); });
+    QObject::connect(quiz, &Quiz::guessFailed, [pickets](auto active, auto /*guessed*/) { pickets->markFailed(active); });
+
+    QObject::connect(quiz, &Quiz::guessSucceeded, [view](auto /*active*/, auto guessed) { view->markPicketSucceed(guessed); });
 
     showMaximized();
+
+    quiz->Start();
 }
 
 MainWindow::~MainWindow()

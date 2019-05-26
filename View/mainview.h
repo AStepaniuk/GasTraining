@@ -15,9 +15,10 @@ public:
     void setModel(const Model* model);
 
 signals:
-    void nodeClicked(size_t nodeIndex);
+    void picketClicked(size_t nodeIndex);
 
 public slots:
+    void markPicketSucceed(size_t picketIndex);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -28,7 +29,9 @@ protected:
 private:
     const Model* model;
     std::vector<QPointF> viewPoints;
-    int hoveredNode = -1;
+    int hoveredPicket = -1;
+
+    std::vector<int> succeedPickets;
 
     std::vector<QPointF> toViewCoordinates(const std::vector<Node*>& nodes, QPointF scale, QPointF offset) const;
     QPointF toViewCoopdinates(const Node* node, QPointF scale, QPointF offset) const;
@@ -39,7 +42,10 @@ private:
     void drawLine(QPainter* painter, QPointF base, QPointF angle, const std::initializer_list<QPointF>& points);
     void drawPipeEnd(QPainter* painter, QPointF point, QPointF direction);
 
+    QPointF getNodeViewPointByPicketIndex(size_t picketIndex);
+
     int getNodeUnderPosition(QPoint position, int d);
+    int findPicketForNode(const Node* node);
 };
 
 #endif // MAINVIEW_H

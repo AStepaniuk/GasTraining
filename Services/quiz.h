@@ -12,18 +12,21 @@ class Quiz : public QObject
 {
     Q_OBJECT
 public:
-    explicit Quiz(Model* model, PicketsView* view, QObject *parent = nullptr);
+    explicit Quiz(Model* model, QObject *parent = nullptr);
 
     void Start();
 
 signals:
+    void activePicketChanged(int picketIndex);
+
+    void guessSucceeded(int activePicketIndex, size_t guessedPicketIndex);
+    void guessFailed(int activePicketIndex, size_t guessedPicketIndex);
 
 public slots:
-    void checkGuess(int guess);
+    void checkGuess(size_t guess);
 
 private:
     Model* model;
-    PicketsView* view;
 
     int activePicket = -1;
 

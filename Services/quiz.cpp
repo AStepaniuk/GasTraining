@@ -102,10 +102,9 @@ namespace QuizImpl
 
 using namespace QuizImpl;
 
-Quiz::Quiz(Model* model, PicketsView* view, QObject *parent)
+Quiz::Quiz(Model* model, QObject *parent)
     : QObject(parent)
     , model { model }
-    , view { view }
 {
 
 }
@@ -120,10 +119,10 @@ void Quiz::Start()
     }
 
     activePicket = getNextActivePicket();
-    view->setActivePicket(activePicket);
+    emit activePicketChanged(activePicket);
 }
 
-void Quiz::checkGuess(int guess)
+void Quiz::checkGuess(size_t guess)
 {
     if (activePicket < 0)
     {
@@ -135,17 +134,17 @@ void Quiz::checkGuess(int guess)
 
     if (arePicketsEqual(actualPicket, guessedPicket))
     {
-        view->markSucceed(activePicket);
+        emit guessSucceeded(activePicket, guess);
     }
     else
     {
-        view->markFailed(activePicket);
+        emit guessFailed(activePicket, guess);
     }
 
     activePicket = getNextActivePicket();
     if (activePicket >= 0)
     {
-        view->setActivePicket(activePicket);
+        emit activePicketChanged(activePicket);
     }
 }
 
