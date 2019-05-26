@@ -6,9 +6,11 @@
 #include "View/picketsview.h"
 #include "Services/picketgenerator.h"
 #include "Services/quiz.h"
+#include "Services/gamegenerator.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow { parent }
+    , model { GameGenerator::GenerateTestModel() }
 {
     PicketGenerator picketGenerator;
     picketGenerator.generatePickets(&model);

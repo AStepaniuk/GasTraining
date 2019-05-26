@@ -359,7 +359,7 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
                 painter.setPen(QPen{ QColor { 180, 40, 40 }, 8.0, Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap, Qt::PenJoinStyle::RoundJoin });
                 painter.drawLine(toWidget(93), toWidget(23), toWidget(117), toWidget(47));
                 painter.drawLine(toWidget(93), toWidget(47), toWidget(117), toWidget(23));
-        }
+            }
         }
     }
 }

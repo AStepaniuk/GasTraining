@@ -67,8 +67,7 @@ struct Picket
 class Model
 {
 public:
-    Model();
-
+    void setData(std::vector<Pipeline> pipelines);
     int addPicket(const Picket& picket);
 
     const std::vector<Pipeline>& getPipelines() const;
