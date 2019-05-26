@@ -146,6 +146,10 @@ void Quiz::checkGuess(size_t guess)
     {
         emit activePicketChanged(activePicket);
     }
+    else
+    {
+        emit quizEnd();
+    }
 }
 
 int Quiz::getNextActivePicket()

@@ -22,6 +22,8 @@ signals:
     void guessSucceeded(int activePicketIndex, size_t guessedPicketIndex);
     void guessFailed(int activePicketIndex, size_t guessedPicketIndex);
 
+    void quizEnd();
+
 public slots:
     void checkGuess(size_t guess);
 

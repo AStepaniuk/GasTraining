@@ -42,6 +42,17 @@ void MainView::markPicketSucceed(size_t picketIndex)
     }
 }
 
+void MainView::stopInteractivety()
+{
+    if (hoveredPicket >= 0)
+    {
+        hoveredPicket = -1;
+        update();
+    }
+
+    interactive = false;
+}
+
 void MainView::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
@@ -134,6 +145,11 @@ void MainView::mouseReleaseEvent(QMouseEvent *event)
 
 void MainView::mouseMoveEvent(QMouseEvent *event)
 {
+    if (!interactive)
+    {
+        return;
+    }
+
     const auto nodeIndex = getNodeUnderPosition(QPoint(event->x(), event->y()), MouseSensitivity);
 
     auto picketIndex = -1;

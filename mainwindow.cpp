@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(quiz, &Quiz::guessFailed, [pickets](auto active, auto /*guessed*/) { pickets->markFailed(active); });
 
     QObject::connect(quiz, &Quiz::guessSucceeded, [view](auto /*active*/, auto guessed) { view->markPicketSucceed(guessed); });
+    QObject::connect(quiz, &Quiz::quizEnd, view, &MainView::stopInteractivety);
 
     showMaximized();
 

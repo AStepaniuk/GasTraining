@@ -19,6 +19,7 @@ signals:
 
 public slots:
     void markPicketSucceed(size_t picketIndex);
+    void stopInteractivety();
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -30,6 +31,7 @@ private:
     const Model* model;
     std::vector<QPointF> viewPoints;
     int hoveredPicket = -1;
+    bool interactive = true;
 
     std::vector<int> succeedPickets;
 
