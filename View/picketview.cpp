@@ -350,13 +350,13 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
                 QPainterPath path;
                 path.moveTo(toWidget(90), toWidget(35));
                 path.lineTo(toWidget(100), toWidget(50));
-                path.lineTo(toWidget(115), toWidget(20));
+                path.lineTo(toWidget(115), toWidget(21));
 
                 painter.drawPath(path);
             }
             else if (status == Status::Failed)
             {
-                painter.setPen(QPen{ QColor { 150, 30, 30 }, 8.0, Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap, Qt::PenJoinStyle::RoundJoin });
+                painter.setPen(QPen{ QColor { 180, 40, 40 }, 8.0, Qt::PenStyle::SolidLine, Qt::PenCapStyle::RoundCap, Qt::PenJoinStyle::RoundJoin });
                 painter.drawLine(toWidget(93), toWidget(23), toWidget(117), toWidget(47));
                 painter.drawLine(toWidget(93), toWidget(47), toWidget(117), toWidget(23));
         }
