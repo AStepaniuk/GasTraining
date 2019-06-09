@@ -2,6 +2,7 @@
 
 #include <map>
 #include <utility>
+#include <cmath>
 
 #include "randomgenerator.h"
 
@@ -57,6 +58,51 @@ namespace GameGeneratorImpl
 
         return { material, diameter, {}, nullptr };
     }
+
+    int GeneratePipeAngle(int minAngle, int maxAngle, int normalProbabilityPercents)
+    {
+        constexpr auto minDeltaFromNormal = 7;
+
+        const int isNormal = RandomGenerator::Get(100) <= normalProbabilityPercents;
+        if (isNormal)
+        {
+            const auto minNormalDiff = minAngle % 90;
+            const auto minNormalAngle = minNormalDiff == 0
+                ? minAngle
+                : minAngle > 0 ? minAngle + 90 - minNormalDiff : minAngle - minNormalDiff;
+
+            const auto maxNormalDiff = maxAngle % 90;
+            const auto maxNormalAngle = maxNormalDiff == 0
+                ? maxAngle
+                : maxAngle > 0 ? maxAngle - maxNormalDiff : maxAngle + 90 - maxNormalDiff;
+
+            const auto delta = maxNormalAngle - minNormalAngle;
+            auto sections = delta / 90;
+
+            return minNormalAngle + RandomGenerator::Get(sections) * 90;
+        }
+        else
+        {
+            const auto delta = maxAngle - minAngle;
+            auto sections = delta / 90;
+
+            const auto lastSectionRest = delta % 90;
+            if (lastSectionRest != 0)
+            {
+                sections++;
+            }
+
+            const auto section = RandomGenerator::Get(sections - 1);
+
+            const auto maxA = (section == sections - 1) && (lastSectionRest > 0)
+                ? lastSectionRest
+                : 90 - minDeltaFromNormal;
+
+            const auto minA = minDeltaFromNormal < maxA ? minDeltaFromNormal : maxA;
+
+            return minAngle + section * 90 + minA + RandomGenerator::Get(maxA - minA);
+        }
+    }
 }
 
 using namespace GameGeneratorImpl;
@@ -96,15 +142,30 @@ Model GameGenerator::GenerateModel()
     auto pipeline = GeneratePipeline();
 
     auto section = GeneratePipeSection(pipeline.pressure);
-    section.nodes =
+
+    auto prevDirection = GeneratePipeAngle(-180, 180, 95);
+    auto prevX = 0;
+    auto prevY = 0;
+
+    auto nodesNum = 3 + RandomGenerator::Get(3);
+    section.nodes.push_back({ prevX, prevY, -0.12, NodeType::End, nullptr });
+
+    for(int i = 0; i < nodesNum; ++i)
     {
-        { 0, 0, -0.12, NodeType::End, nullptr },
-        { 0, 50, -0.12, NodeType::Turn, nullptr },
-        { 50, 50, -0.12, NodeType::Turn, nullptr },
-        { 80, 20, -0.12, NodeType::Turn, nullptr },
-        { 80, -30, -0.12, NodeType::Turn, nullptr },
-        { 120, -40, -0.12, NodeType::End, nullptr }
-    };
+        const auto len = 1 + RandomGenerator::Get(19);
+        const auto dir = GeneratePipeAngle(prevDirection - 90, prevDirection + 90, 95);
+
+        const auto x = prevX + len * std::cos(dir / 180.0 * M_PI);
+        const auto y = prevY + len * std::sin(dir / 180.0 * M_PI);
+
+        const auto type = i == nodesNum - 1 ? NodeType::End : NodeType::Turn;
+
+        section.nodes.push_back({ x, y, -0.12, type, nullptr });
+
+        prevDirection = dir;
+        prevX = x;
+        prevY = y;
+    }
 
     pipeline.sections = { std::move(section) };
 
