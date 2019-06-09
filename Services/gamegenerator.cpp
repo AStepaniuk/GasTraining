@@ -8,6 +8,8 @@
 
 namespace GameGeneratorImpl
 {
+    constexpr auto minSensitiveAngle = 7;
+
     Pipeline GeneratePipeline()
     {
         int pressure = RandomGenerator::Get(3);
@@ -61,8 +63,6 @@ namespace GameGeneratorImpl
 
     int GeneratePipeAngle(int minAngle, int maxAngle, int normalProbabilityPercents)
     {
-        constexpr auto minDeltaFromNormal = 7;
-
         const int isNormal = RandomGenerator::Get(100) <= normalProbabilityPercents;
         if (isNormal)
         {
@@ -96,9 +96,9 @@ namespace GameGeneratorImpl
 
             const auto maxA = (section == sections - 1) && (lastSectionRest > 0)
                 ? lastSectionRest
-                : 90 - minDeltaFromNormal;
+                : 90 - minSensitiveAngle;
 
-            const auto minA = minDeltaFromNormal < maxA ? minDeltaFromNormal : maxA;
+            const auto minA = minSensitiveAngle < maxA ? minSensitiveAngle : maxA;
 
             return minAngle + section * 90 + minA + RandomGenerator::Get(maxA - minA);
         }
@@ -153,7 +153,11 @@ Model GameGenerator::GenerateModel()
     for(int i = 0; i < nodesNum; ++i)
     {
         const auto len = 1 + RandomGenerator::Get(19);
-        const auto dir = GeneratePipeAngle(prevDirection - 90, prevDirection + 90, 95);
+        auto dir = GeneratePipeAngle(prevDirection - 90, prevDirection + 90, 90);
+        while(std::abs(dir - prevDirection) <= minSensitiveAngle)
+        {
+            dir = GeneratePipeAngle(prevDirection - 90, prevDirection + 90, 90);
+        }
 
         const auto x = prevX + len * std::cos(dir / 180.0 * M_PI);
         const auto y = prevY + len * std::sin(dir / 180.0 * M_PI);
