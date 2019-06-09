@@ -60,27 +60,29 @@ namespace TurnGeometryImpl
 
     int GetPicketAngle(double realAngle)
     {
+        constexpr auto normalDiff = 1;
+
         if (realAngle > 180.0)
         {
             realAngle -= 360.0;
         }
 
-        if (realAngle < 0.5 && realAngle > -0.5)
+        if (realAngle < normalDiff && realAngle > -normalDiff)
         {
             return 0;
         }
 
-        if (realAngle < 90.5 && realAngle > 89.5)
+        if (realAngle < 90 + normalDiff && realAngle > 90 - normalDiff)
         {
             return 90;
         }
 
-        if (realAngle < -179.5 || realAngle > 179.5)
+        if (realAngle < -180 + normalDiff || realAngle > 180 - normalDiff)
         {
             return 180;
         }
 
-        if (realAngle < -89.5 && realAngle > -90.5)
+        if (realAngle < -90 + normalDiff && realAngle > -90 - normalDiff)
         {
             return -90;
         }

@@ -118,9 +118,9 @@ Model GameGenerator::GenerateTestModel()
                     PipeMaterial::St,
                     110,
                     {
-                        { 80, 0, -0.12, NodeType::End, nullptr },
+                        { 80, 1, -0.12, NodeType::End, nullptr },
                         { 50, 0, -0.12, NodeType::Turn, nullptr },
-                        { 0, -20, -0.12, NodeType::End, nullptr }
+                        { 0, 20, -0.12, NodeType::End, nullptr }
 
                         // { 0, 0, -0.12, NodeType::End, nullptr },
                         // { 0, 50, -0.12, NodeType::Turn, nullptr },
@@ -158,9 +158,12 @@ Model GameGenerator::GenerateModel()
     {
         const auto len = 1 + RandomGenerator::Get(19);
         auto dir = GeneratePipeAngle(prevDirection - 90, prevDirection + 90, 90);
-        while(std::abs(dir - prevDirection) <= minSensitiveAngle)
+
+        auto da = std::abs(dir - prevDirection);
+        while(da <= minSensitiveAngle || da > 90)
         {
             dir = GeneratePipeAngle(prevDirection - 90, prevDirection + 90, 90);
+            da = std::abs(dir - prevDirection);
         }
 
         const auto x = prevX + len * std::cos(dir / 180.0 * M_PI);

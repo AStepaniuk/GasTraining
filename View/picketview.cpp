@@ -242,7 +242,7 @@ QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles
     QTransform t;
     t.translate(toWidget(x), toWidget(y));
 
-    if (da == 90 || da == -90)
+    if ((da == 90 || da == -90) && (a1 % 90 == 0))
     {
         return t.map(BuildNormalTurnAnglePath(a1, a2, toWidget));
     }
