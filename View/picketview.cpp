@@ -212,10 +212,17 @@ QPainterPath BuildNormalTurnAnglePath(int a1, int a2, const std::function<int(in
     return path;
 }
 
-QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles, const std::function<int(int)>& toWidget)
+QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int, int>& angles, const std::function<int(int)>& toWidget)
 {
     auto a1 = -std::get<0>(angles);
     auto a2 = -std::get<1>(angles);
+    auto ra = -std::get<2>(angles);
+
+    if (ra == 0 || ra == 180 || ra == -180)
+    {
+        return {};
+    }
+
     if (a2 < a1)
     {
         a2 = a2 + 360;
@@ -233,21 +240,29 @@ QPainterPath BuildTurnAnglePath(int x, int y, const std::tuple<int, int>& angles
         da = a2 - a1;
     }
 
-    if (da == 0 || da == 180 || da == -180)
-    {
-        return {};
-    }
-
-
     QTransform t;
     t.translate(toWidget(x), toWidget(y));
 
-    if ((da == 90 || da == -90) && (a1 % 90 == 0))
+    if ((ra == 90 || ra == -90) && (a1 % 90 == 0))
     {
         return t.map(BuildNormalTurnAnglePath(a1, a2, toWidget));
     }
     else
     {
+        if (da == 180)
+        {
+            if (ra > 0)
+            {
+                a1 = -std::get<0>(angles);
+                a2 = -std::get<1>(angles);
+            }
+            else
+            {
+                a1 = -std::get<1>(angles);
+                a2 = -std::get<0>(angles);
+            }
+        }
+
         return t.map(BuildAnyTurnAnglePath(a1, a2, da, toWidget));
     }
 }
@@ -329,7 +344,8 @@ void PicketView::paintEvent(QPaintEvent * /*event*/)
                 painter.drawPath(BuildTurnPath(70, 110, sa2, toWidget));
             }
 
-            painter.drawPath(BuildTurnAnglePath(70, 110, std::make_tuple(sa1, sa2), toWidget));
+            const auto turnAngle = turnGeometry.turnAngle > 0 ? turnGeometry.picketTurnAngle : -turnGeometry.picketTurnAngle;
+            painter.drawPath(BuildTurnAnglePath(70, 110, std::make_tuple(sa1, sa2, turnAngle), toWidget));
         }
 
         QRect line2Rect { toWidget(10), toWidget(50), toWidget(120), toWidget(30) };

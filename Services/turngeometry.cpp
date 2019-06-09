@@ -6,6 +6,8 @@
 
 namespace TurnGeometryImpl
 {
+    constexpr auto normalDiff = 1;
+
     std::tuple<double, double> GetPipesAngles(const Node& node)
     {
         if (node.type != NodeType::Turn)
@@ -50,18 +52,16 @@ namespace TurnGeometryImpl
             a = a + 360.0;
         }
 
-        if (a < 0)
-        {
-            a = -a;
-        }
+        //if (a < 0)
+        //{
+        //    a = -a;
+        //}
 
         return a;
     }
 
     int GetPicketAngle(double realAngle)
     {
-        constexpr auto normalDiff = 1;
-
         if (realAngle > 180.0)
         {
             realAngle -= 360.0;
@@ -127,7 +127,21 @@ TurnGeometry::Data TurnGeometry::Calculate(const Node &node)
     result.picketAngle1 = GetPicketAngle(result.angle1);
     result.picketAngle2 = GetPicketAngle(result.angle2);
 
-    result.picketTurnAngle = static_cast<int>(turnAngle);
+    auto picketTurnAngle = static_cast<int>(std::abs(turnAngle));
+
+    if (result.picketAngle1 % 90 == 0)
+    {
+        if (std::abs(picketTurnAngle - 90) <= normalDiff)
+        {
+            picketTurnAngle = 90;
+        }
+        else if (std::abs(picketTurnAngle - 180) <= normalDiff)
+        {
+            picketTurnAngle = 180;
+        }
+    }
+
+    result.picketTurnAngle = picketTurnAngle;
 
     return result;
 }

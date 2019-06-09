@@ -10,7 +10,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow { parent }
-    // , model { GameGenerator::GenerateTestModel() }
+    //, model { GameGenerator::GenerateTestModel() }
     , model { GameGenerator::GenerateModel() }
 {
     PicketGenerator picketGenerator;
