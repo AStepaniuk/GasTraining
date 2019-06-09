@@ -119,8 +119,8 @@ Model GameGenerator::GenerateTestModel()
                     110,
                     {
                         { 0, 0, -0.12, NodeType::End, nullptr },
-                        { -50, 50, -0.12, NodeType::Turn, nullptr },
-                        { -100, 120, -0.12, NodeType::End, nullptr }
+                        { -1, 50, -0.12, NodeType::Turn, nullptr },
+                        { 100, 70, -0.12, NodeType::End, nullptr }
 
                         // { 0, 0, -0.12, NodeType::End, nullptr },
                         // { 0, 50, -0.12, NodeType::Turn, nullptr },

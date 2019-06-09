@@ -6,7 +6,7 @@
 
 namespace TurnGeometryImpl
 {
-    constexpr auto normalDiff = 1;
+    constexpr auto normalDiff = 2;
 
     std::tuple<double, double> GetPipesAngles(const Node& node)
     {
