@@ -100,7 +100,7 @@ namespace TurnGeometryImpl
             return -45;
         }
 
-        if (realAngle > -90)
+        if (realAngle < -90)
         {
             return -135;
         }

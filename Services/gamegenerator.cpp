@@ -118,12 +118,16 @@ Model GameGenerator::GenerateTestModel()
                     PipeMaterial::St,
                     110,
                     {
-                        { 0, 0, -0.12, NodeType::End, nullptr },
-                        { 0, 50, -0.12, NodeType::Turn, nullptr },
-                        { 50, 50, -0.12, NodeType::Turn, nullptr },
-                        { 80, 20, -0.12, NodeType::Turn, nullptr },
-                        { 80, -30, -0.12, NodeType::Turn, nullptr },
-                        { 120, -40, -0.12, NodeType::End, nullptr }
+                        { 80, 0, -0.12, NodeType::End, nullptr },
+                        { 50, 0, -0.12, NodeType::Turn, nullptr },
+                        { 0, -20, -0.12, NodeType::End, nullptr }
+
+                        // { 0, 0, -0.12, NodeType::End, nullptr },
+                        // { 0, 50, -0.12, NodeType::Turn, nullptr },
+                        // { 50, 50, -0.12, NodeType::Turn, nullptr },
+                        // { 80, 20, -0.12, NodeType::Turn, nullptr },
+                        // { 80, -30, -0.12, NodeType::Turn, nullptr },
+                        // { 120, -40, -0.12, NodeType::End, nullptr }
                     },
                     nullptr
                 }
@@ -147,7 +151,7 @@ Model GameGenerator::GenerateModel()
     auto prevX = 0;
     auto prevY = 0;
 
-    auto nodesNum = 3 + RandomGenerator::Get(3);
+    auto nodesNum = 4 + RandomGenerator::Get(3);
     section.nodes.push_back({ prevX, prevY, -0.12, NodeType::End, nullptr });
 
     for(int i = 0; i < nodesNum; ++i)
