@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 
 #include <QVBoxLayout>
+#include <QMenuBar>
+#include <QAction>
+#include <QApplication>
 
 #include "View/mainview.h"
 #include "View/picketsview.h"
@@ -12,7 +15,21 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow { parent }
     //, model { GameGenerator::GenerateTestModel() }
     , model { GameGenerator::GenerateModel() }
+    , quiz { &model, this }
 {
+    setWindowTitle(tr("Привязочные знаки"));
+
+    auto restartAction = new QAction(tr("&Начать"), this);
+    auto exitAction = new QAction(tr("&Выход"), this);
+
+    auto trainingMenu = menuBar()->addMenu(tr("&Тренировка"));
+    trainingMenu->addAction(restartAction);
+    trainingMenu->addSeparator();
+    trainingMenu->addAction(exitAction);
+
+    QObject::connect(restartAction, &QAction::triggered, this, &MainWindow::restart);
+    QObject::connect(exitAction, &QAction::triggered, this, &MainWindow::exit);
+
     PicketGenerator picketGenerator;
     picketGenerator.generatePickets(&model);
 
@@ -33,23 +50,35 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(centralWidget);
 
-    auto quiz = new Quiz(&model, pickets);
+    QObject::connect(view, &MainView::picketClicked, &quiz, &Quiz::checkGuess);
 
-    QObject::connect(view, &MainView::picketClicked, quiz, &Quiz::checkGuess);
+    QObject::connect(&quiz, &Quiz::activePicketChanged, pickets, &PicketsView::setActivePicket);
+    QObject::connect(&quiz, &Quiz::guessSucceeded, [pickets](auto active, auto /*guessed*/) { pickets->markSucceed(active); });
+    QObject::connect(&quiz, &Quiz::guessFailed, [pickets](auto active, auto /*guessed*/) { pickets->markFailed(active); });
 
-    QObject::connect(quiz, &Quiz::activePicketChanged, pickets, &PicketsView::setActivePicket);
-    QObject::connect(quiz, &Quiz::guessSucceeded, [pickets](auto active, auto /*guessed*/) { pickets->markSucceed(active); });
-    QObject::connect(quiz, &Quiz::guessFailed, [pickets](auto active, auto /*guessed*/) { pickets->markFailed(active); });
-
-    QObject::connect(quiz, &Quiz::guessSucceeded, [view](auto /*active*/, auto guessed) { view->markPicketSucceed(guessed); });
-    QObject::connect(quiz, &Quiz::quizEnd, view, &MainView::stopInteractivety);
+    QObject::connect(&quiz, &Quiz::guessSucceeded, [view](auto /*active*/, auto guessed) { view->markPicketSucceed(guessed); });
+    QObject::connect(&quiz, &Quiz::quizEnd, view, &MainView::stopInteractivety);
 
     showMaximized();
 
-    quiz->Start();
+    quiz.Start();
 }
 
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::exit()
+{
+    QApplication::exit();
+}
+
+void MainWindow::restart()
+{
+    model = GameGenerator::GenerateModel();
+    PicketGenerator picketGenerator;
+    picketGenerator.generatePickets(&model);
+
+    quiz.Start();
 }
